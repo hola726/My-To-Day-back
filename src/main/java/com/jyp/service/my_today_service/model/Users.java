@@ -3,6 +3,9 @@ package com.jyp.service.my_today_service.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Entity
 public class Users {
@@ -16,6 +19,9 @@ public class Users {
     private String password;
     @Column(nullable = false, length = 254)
     private String email;
+
+    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts = new ArrayList<>();
 
 
     public Long getId() {
@@ -36,7 +42,7 @@ public class Users {
     }
 
     public String getEmail() {
-        return this.email;
+        return email;
     }
 
     public void setEmail(String email) {
@@ -44,11 +50,24 @@ public class Users {
     }
 
     public String getPassword() {
-        return this.password;
+        return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
+    }
+
+    public void addPost(Post post) {
+        post.setUsers(this);
+        posts.add(post);
     }
 
 }
