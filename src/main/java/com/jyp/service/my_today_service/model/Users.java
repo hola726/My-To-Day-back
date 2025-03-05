@@ -14,14 +14,20 @@ public class Users {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false, unique = true, length = 25)
-    private String userId;
-    @Column(nullable = false, length = 255)
-    private String password;
+    private String userId; // 사용자 ID
+    @Column(nullable = false)
+    private String password; // 사용자 비밀번호
     @Column(nullable = false, length = 254)
-    private String email;
+    private String email; // 사용자 이메일
 
     @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Post> posts = new ArrayList<>();
+    private List<Post> posts = new ArrayList<>(); // 게시물
+
+    public Users(String userId, String password, String email) {
+        this.userId = userId;
+        this.password = password;
+        this.email = email;
+    }
 
 
     public Long getId() {

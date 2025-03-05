@@ -17,22 +17,22 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true)
-    private String imagePath;
+    private String imagePath; // 이미지
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String content;
+    private String content;  // 본문
     @Column()
-    private Double latitude;
+    private Double latitude; // 위도
     @Column()
-    private Double longitude;
+    private Double longitude; // 경도
     @CreatedDate
     @Column(updatable = false)
-    private Instant createdAt;
+    private Instant createdAt; // 생성 일자
     @LastModifiedDate
     @Column()
-    private Instant updatedAt;
+    private Instant updatedAt; // 갱신 일자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private Users users;
+    private Users users; // 유저
 
 
     public Post(String imagePath, String content, Double latitude, Double longitude) {
