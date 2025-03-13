@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+// 사용자 Entity
 @Entity
 public class Users {
 
@@ -27,6 +28,9 @@ public class Users {
         this.userId = userId;
         this.password = password;
         this.email = email;
+    }
+
+    public Users() {
     }
 
 
