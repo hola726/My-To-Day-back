@@ -354,3 +354,7 @@ gradle-app.setting
 ### Gradle Patch ###
 # Java heap dump
 *.hprof
+
+
+# JWT secret key 무시
+src/main/java/com/jyp/service/my_today_service/config/jwt.secret.key
