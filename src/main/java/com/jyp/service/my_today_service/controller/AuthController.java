@@ -2,6 +2,7 @@ package com.jyp.service.my_today_service.controller;
 
 import com.jyp.service.my_today_service.dto.ApiResponse;
 import com.jyp.service.my_today_service.dto.SignUpDto;
+import com.jyp.service.my_today_service.dto.UserInfoDto;
 import com.jyp.service.my_today_service.model.Users;
 import com.jyp.service.my_today_service.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,9 +28,10 @@ public class AuthController {
 
     @Operation(summary = "회원가입 API")
     @PostMapping("v1.0/sign-up")
-    public ResponseEntity<ApiResponse<SignUpDto>> SignUp(@Valid @RequestBody SignUpDto signUpDto) {
-        userService.saveUser(new Users(signUpDto.getUserId(), signUpDto.getPassword(), signUpDto.getEmail()));
-        ApiResponse<SignUpDto> response = new ApiResponse<SignUpDto>(true, "", "", signUpDto);
+    public ResponseEntity<ApiResponse<UserInfoDto>> SignUp(@Valid @RequestBody SignUpDto signUpDto) {
+        final Users user = userService.saveUser(signUpDto.getUserId(), signUpDto.getPassword(), signUpDto.getEmail());
+        final UserInfoDto userInfo = new UserInfoDto(user.getUserId(), user.getEmail());
+        ApiResponse<UserInfoDto> response = new ApiResponse<>(true, "", "", userInfo);
         return ResponseEntity.ok(response);
     }
 }
