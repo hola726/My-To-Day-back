@@ -2,6 +2,7 @@ package com.jyp.service.my_today_service.service;
 
 import com.jyp.service.my_today_service.model.Users;
 import com.jyp.service.my_today_service.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,10 +24,28 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Users saveUser(Users user) {
-        String encodePassword = passwordEncoder.encode(user.getPassword());
+    public Users saveUser(String userId, String password, String email) {
+        Users user = new Users();
+        user.setUserId(userId);
+        String encodePassword = passwordEncoder.encode(password);
         user.setPassword(encodePassword);
+        user.setEmail(email);
         return userRepository.save(user);
+    }
+
+    @Transactional
+    public Users updateUser(Long id, Optional<String> password, Optional<String> email) {
+        Optional<Users> user = userRepository.findById(id);
+        if (user.isEmpty()) {
+            throw new IllegalArgumentException("User not found with id: " + id);
+        }
+        if (password.isPresent()) {
+            String encodePassword = passwordEncoder.encode(password.get());
+            user.get().setPassword(encodePassword);
+        }
+        email.ifPresent(user.get()::setEmail);
+
+        return userRepository.save(user.get());
     }
 
 
