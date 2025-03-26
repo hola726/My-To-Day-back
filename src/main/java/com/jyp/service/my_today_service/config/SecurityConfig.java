@@ -3,6 +3,7 @@ package com.jyp.service.my_today_service.config;
 import com.jyp.service.my_today_service.security.JwtAuthenticationFilter;
 import com.jyp.service.my_today_service.security.JwtAuthorizationFilter;
 import com.jyp.service.my_today_service.security.JwtUtil;
+import com.jyp.service.my_today_service.service.BlackListTokenService;
 import com.jyp.service.my_today_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -23,12 +24,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final UserService userService;
+    private final BlackListTokenService blackListTokenService;
 
 
     @Autowired
-    public SecurityConfig(JwtUtil jwtUtil, UserService userService) {
+    public SecurityConfig(JwtUtil jwtUtil, UserService userService, BlackListTokenService blackListTokenService) {
         this.jwtUtil = jwtUtil;
         this.userService = userService;
+        this.blackListTokenService = blackListTokenService;
     }
 
 
@@ -48,7 +51,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilter(new JwtAuthenticationFilter(authenticationManager, jwtUtil))    // 로그인 필터
-                .addFilterBefore(new JwtAuthorizationFilter(jwtUtil, userService),
+                .addFilterBefore(new JwtAuthorizationFilter(jwtUtil, userService, blackListTokenService),
                         UsernamePasswordAuthenticationFilter.class) // 토큰 검증 필터
                 .formLogin(AbstractHttpConfigurer::disable) // 폼 로그인 비활성화
                 // H2 Console은 iframe을 사용해 렌더링, 동일 출처의 iframe에서 로드되게 허용

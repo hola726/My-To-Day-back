@@ -1,5 +1,6 @@
 package com.jyp.service.my_today_service.security;
 
+import com.jyp.service.my_today_service.service.BlackListTokenService;
 import com.jyp.service.my_today_service.service.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,10 +20,12 @@ import java.util.Collections;
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserService userService;
+    private final BlackListTokenService blackListTokenService;
 
-    public JwtAuthorizationFilter(JwtUtil jwtUtil, UserService userService) {
+    public JwtAuthorizationFilter(JwtUtil jwtUtil, UserService userService, BlackListTokenService blackListTokenService) {
         this.jwtUtil = jwtUtil;
         this.userService = userService;
+        this.blackListTokenService = blackListTokenService;
     }
 
     /// 토큰 검증 후 SecurityContext에 인증 정보 저장
@@ -32,6 +35,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
+            if (blackListTokenService.isBlackListToken(token)) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "토큰이 무효화되었습니다");
+                return;
+            }
             if (jwtUtil.validateToken(token)) {
                 String userId = jwtUtil.extractId(token);
                 UserDetails user = userService.loadUserByUsername(userId);
