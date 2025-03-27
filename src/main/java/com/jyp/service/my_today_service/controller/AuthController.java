@@ -52,6 +52,6 @@ public class AuthController {
             return ResponseEntity.ok(new ApiResponse<String>(true, "", "", token));
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<String>(true, "", "", "{\"error\": \"유효한 토큰 필요\"}"));
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<String>(false, "", "", "{\"error\": \"유효한 토큰 필요\"}"));
     }
 }

@@ -42,6 +42,9 @@ public class Post {
         this.longitude = longitude;
     }
 
+    public Post() {
+    }
+
 
     public Long getId() {
         return id;
