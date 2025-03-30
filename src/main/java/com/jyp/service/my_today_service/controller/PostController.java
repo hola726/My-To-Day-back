@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -113,6 +112,20 @@ public class PostController {
 
         ApiResponse<PostDto> response = new ApiResponse<>(true, "게시물이 성공적으로 수정되었습니다.", "", responseDto);
 
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(summary = "게시물 삭제")
+    @DeleteMapping("v1.0/post")
+    public ResponseEntity<ApiResponse<PostDto>> deletePost(@RequestParam Long postId) {
+        final Optional<Post> post = postService.findPostById(postId);
+
+        if (post.isEmpty()) {
+            throw new RuntimeException("게시물을 찾을 수 없습니다.");
+        }
+        postService.deletePostById(postId);
+        final PostDto responseDto = new PostDto(post.get().getImagePath(), post.get().getContent(), post.get().getLatitude(), post.get().getLongitude());
+        final ApiResponse<PostDto> response = new ApiResponse<>(true, "", "", responseDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
