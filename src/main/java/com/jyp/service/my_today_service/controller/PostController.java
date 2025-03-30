@@ -2,6 +2,9 @@ package com.jyp.service.my_today_service.controller;
 
 import com.jyp.service.my_today_service.dto.ApiResponse;
 import com.jyp.service.my_today_service.dto.PostDto;
+import com.jyp.service.my_today_service.dto.PageResponseDto;
+import com.jyp.service.my_today_service.dto.PostRequestDto;
+import com.jyp.service.my_today_service.dto.PostResponseDto;
 import com.jyp.service.my_today_service.model.Post;
 import com.jyp.service.my_today_service.model.Users;
 import com.jyp.service.my_today_service.security.AuthUtil;
@@ -12,6 +15,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,6 +39,15 @@ public class PostController {
         this.postService = postService;
         this.userService = userService;
         this.authUtil = authUtil;
+    }
+
+
+    @Operation(summary = "게시물 조회")
+    @GetMapping("v1.0/post")
+    public ResponseEntity<ApiResponse<PageResponseDto<PostResponseDto>>> getPost(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        PageResponseDto<PostResponseDto> pageResponseDto = postService.getPosts(pageable);
+        final ApiResponse<PageResponseDto<PostResponseDto>> response = new ApiResponse<>(true, "", "", pageResponseDto);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "게시물 등록")
