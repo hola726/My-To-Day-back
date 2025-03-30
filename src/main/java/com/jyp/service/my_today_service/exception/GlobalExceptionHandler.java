@@ -32,6 +32,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    ///  runtime exception 처리
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<String>> handleRuntimeException(RuntimeException ex) {
+        ApiResponse<String> response = new ApiResponse<>(false, ex.getMessage(), "", null);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     ///  기본 exception 처리
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<String>> handleGeneralException(Exception ex) {
