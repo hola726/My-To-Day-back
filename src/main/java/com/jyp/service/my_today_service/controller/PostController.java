@@ -1,7 +1,6 @@
 package com.jyp.service.my_today_service.controller;
 
 import com.jyp.service.my_today_service.dto.ApiResponse;
-import com.jyp.service.my_today_service.dto.PostDto;
 import com.jyp.service.my_today_service.dto.PageResponseDto;
 import com.jyp.service.my_today_service.dto.PostRequestDto;
 import com.jyp.service.my_today_service.dto.PostResponseDto;
@@ -53,7 +52,7 @@ public class PostController {
     @Operation(summary = "게시물 등록")
     @Transactional
     @PostMapping("v1.0/post")
-    public ResponseEntity<ApiResponse<PostDto>> setPost(@RequestBody @Valid PostDto postDto) {
+    public ResponseEntity<ApiResponse<PostResponseDto>> setPost(@RequestBody @Valid PostRequestDto postRequestDto) {
         // 현재 인증된 사용자 정보 가져오기
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String userIdFromToken;
@@ -69,21 +68,23 @@ public class PostController {
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다: " + userIdFromToken));
 
         final Post post = new Post(
-                postDto.getImagePath(),
-                postDto.getContent(),
-                postDto.getLatitude(),
-                postDto.getLongitude()
+                postRequestDto.getImagePath(),
+                postRequestDto.getContent(),
+                postRequestDto.getLatitude(),
+                postRequestDto.getLongitude()
         );
         post.setUsers(user);
         final Post savePost = postService.savePost(post);
 
-        PostDto responseDto = new PostDto(
+        PostResponseDto responseDto = new PostResponseDto(
+                savePost.getId(),
                 savePost.getImagePath(),
                 savePost.getContent(),
                 savePost.getLatitude(),
                 savePost.getLongitude()
+                , savePost.getUsers().getId()
         );
-        ApiResponse<PostDto> response = new ApiResponse<>(true, "게시물이 성공적으로 등록되었습니다.", "", responseDto);
+        ApiResponse<PostResponseDto> response = new ApiResponse<>(true, "게시물이 성공적으로 등록되었습니다.", "", responseDto);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
 
@@ -92,8 +93,8 @@ public class PostController {
     @Operation(summary = "게시물 수정")
     @Transactional
     @PutMapping("v1.0/post")
-    public ResponseEntity<ApiResponse<PostDto>> updatePost(@RequestBody @Valid PostDto postDto, @RequestParam Long postId) {
-        if (postDto.isEmpty()) {
+    public ResponseEntity<ApiResponse<PostResponseDto>> updatePost(@RequestBody @Valid PostRequestDto postRequestDto, @RequestParam Long postId) {
+        if (postRequestDto.isEmpty()) {
             throw new RuntimeException("수정할 내용이 없습니다.");
         }
 
@@ -107,40 +108,44 @@ public class PostController {
             throw new RuntimeException("게시물 수정 권한이 없습니다.(다른사용자의 게시물)");
         }
 
-        if (postDto.getImagePath().equals(post.get().getImagePath()) && postDto.getContent().equals(post.get().getContent()) && postDto.getLatitude().equals(post.get().getLatitude()) && postDto.getLongitude().equals(post.get().getLongitude())) {
+        if (postRequestDto.getImagePath().equals(post.get().getImagePath()) && postRequestDto.getContent().equals(post.get().getContent()) && postRequestDto.getLatitude().equals(post.get().getLatitude()) && postRequestDto.getLongitude().equals(post.get().getLongitude())) {
             throw new RuntimeException("수정할 내용이 없습니다.");
         }
 
-        post.get().setImagePath(postDto.getImagePath());
-        post.get().setContent(postDto.getContent());
-        post.get().setLatitude(postDto.getLatitude());
-        post.get().setLongitude(postDto.getLongitude());
+        post.get().setImagePath(postRequestDto.getImagePath());
+        post.get().setContent(postRequestDto.getContent());
+        post.get().setLatitude(postRequestDto.getLatitude());
+        post.get().setLongitude(postRequestDto.getLongitude());
         post.get().setUpdatedAt(Instant.now());
 
         final Post savePost = postService.savePost(post.get());
-        final PostDto responseDto = new PostDto(
+        final PostResponseDto responseDto = new PostResponseDto(
+                savePost.getId(),
                 savePost.getImagePath(),
                 savePost.getContent(),
                 savePost.getLatitude(),
-                savePost.getLongitude()
+                savePost.getLongitude(),
+                savePost.getUsers().getId()
         );
 
-        ApiResponse<PostDto> response = new ApiResponse<>(true, "게시물이 성공적으로 수정되었습니다.", "", responseDto);
+        ApiResponse<PostResponseDto> response = new ApiResponse<>(true, "게시물이 성공적으로 수정되었습니다.", "", responseDto);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Operation(summary = "게시물 삭제")
     @DeleteMapping("v1.0/post")
-    public ResponseEntity<ApiResponse<PostDto>> deletePost(@RequestParam Long postId) {
+    public ResponseEntity<ApiResponse<PostResponseDto>> deletePost(@RequestParam Long postId) {
         final Optional<Post> post = postService.findPostById(postId);
 
         if (post.isEmpty()) {
             throw new RuntimeException("게시물을 찾을 수 없습니다.");
         }
         postService.deletePostById(postId);
-        final PostDto responseDto = new PostDto(post.get().getImagePath(), post.get().getContent(), post.get().getLatitude(), post.get().getLongitude());
-        final ApiResponse<PostDto> response = new ApiResponse<>(true, "", "", responseDto);
+        final PostResponseDto responseDto = new PostResponseDto(
+                post.get().getId(),
+                post.get().getImagePath(), post.get().getContent(), post.get().getLatitude(), post.get().getLongitude(), post.get().getUsers().getId());
+        final ApiResponse<PostResponseDto> response = new ApiResponse<>(true, "", "", responseDto);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
