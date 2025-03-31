@@ -19,8 +19,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -43,9 +41,15 @@ public class PostController {
 
     @Operation(summary = "게시물 조회")
     @GetMapping("v1.0/post")
-    public ResponseEntity<ApiResponse<PageResponseDto<PostResponseDto>>> getPost(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        PageResponseDto<PostResponseDto> pageResponseDto = postService.getPosts(pageable);
-        final ApiResponse<PageResponseDto<PostResponseDto>> response = new ApiResponse<>(true, "", "", pageResponseDto);
+    public ResponseEntity<ApiResponse<PageResponseDto<PostResponseDto>>> getPost(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Instant startDate,
+            @RequestParam(required = false) Instant endDate,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        final Users user = authUtil.getUser();
+        PageResponseDto<PostResponseDto> pageResponseDto = postService.getPosts(keyword, startDate, endDate, user.getId(), pageable);
+        final ApiResponse<PageResponseDto<PostResponseDto>> response = new ApiResponse<>(true, "게시물 목록 조회 성공", "", pageResponseDto);
         return ResponseEntity.ok(response);
     }
 
@@ -53,20 +57,7 @@ public class PostController {
     @Transactional
     @PostMapping("v1.0/post")
     public ResponseEntity<ApiResponse<PostResponseDto>> setPost(@RequestBody @Valid PostRequestDto postRequestDto) {
-        // 현재 인증된 사용자 정보 가져오기
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String userIdFromToken;
-
-        if (principal instanceof UserDetails) {
-            userIdFromToken = ((UserDetails) principal).getUsername(); // JWT에서 username 또는 userId로 설정된 값
-        } else {
-            throw new RuntimeException("인증된 사용자를 찾을 수 없습니다.");
-        }
-
-        // UserService를 통해 Users 엔티티 조회
-        Users user = userService.findUserByUserId(userIdFromToken)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다: " + userIdFromToken));
-
+        final Users user = authUtil.getUser();
         final Post post = new Post(
                 postRequestDto.getImagePath(),
                 postRequestDto.getContent(),

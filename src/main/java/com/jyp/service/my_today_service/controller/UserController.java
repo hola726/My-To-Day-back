@@ -4,6 +4,7 @@ import com.jyp.service.my_today_service.dto.ApiResponse;
 import com.jyp.service.my_today_service.dto.UserUpdateDto;
 import com.jyp.service.my_today_service.dto.UserInfoDto;
 import com.jyp.service.my_today_service.model.Users;
+import com.jyp.service.my_today_service.security.AuthUtil;
 import com.jyp.service.my_today_service.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

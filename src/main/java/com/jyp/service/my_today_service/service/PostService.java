@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,8 +37,8 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponseDto<PostResponseDto> getPosts(Pageable pageable) {
-        Page<Post> postPage = postRepository.findAll(pageable);
+    public PageResponseDto<PostResponseDto> getPosts(String keyword, Instant startDate, Instant endDate, Long userId, Pageable pageable) {
+        Page<Post> postPage = postRepository.findByContentAndDateRange(keyword, startDate, endDate, userId, pageable);
         List<PostResponseDto> postResponseDtos = postPage.getContent().stream().map(e -> new PostResponseDto(e.getId(), e.getImagePath(), e.getContent(), e.getLatitude(), e.getLongitude(), e.getUsers().getId())).toList();
         return new PageResponseDto<>(postResponseDtos, postPage.getPageable().getPageNumber(), postPage.getPageable().getPageSize(), postPage.getTotalElements(), postPage.getTotalPages(), postPage.isLast());
     }
